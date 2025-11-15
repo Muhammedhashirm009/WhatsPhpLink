@@ -1,0 +1,39 @@
+# Node modules
+node_modules
+npm-debug.log
+
+# WhatsApp session data (will be mounted as volume)
+.wwebjs_auth
+.wwebjs_cache
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+
+# Testing
+coverage
+.nyc_output
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build artifacts (if using separate build step)
+dist
+build

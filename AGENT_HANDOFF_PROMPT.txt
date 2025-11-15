@@ -1,0 +1,156 @@
+## WhatsApp Bot API Integration - Agent Handoff Prompt
+
+### Context
+You are integrating with a WhatsApp bot REST API that enables sending WhatsApp messages programmatically from a PHP application. The WhatsApp bot is a Node.js service that uses WhatsApp Web.js library and has been deployed separately.
+
+### Your Task
+Implement WhatsApp messaging integration in an existing PHP application to send automated customer messages (e.g., welcome messages upon registration, order confirmations, notifications).
+
+### WhatsApp Bot API Details
+
+**Base URL**: http://your-whatsapp-bot-server:5000
+**Authentication**: None (secure at network/proxy level)
+**Content-Type**: application/json
+
+**Available Endpoints**:
+
+1. POST /api/send-message
+   - Send a WhatsApp message to a phone number
+   - Request body: { "phoneNumber": "918590000953", "message": "Your message here" }
+   - Response: { "success": true, "message": "Message sent successfully" }
+
+2. GET /api/session
+   - Check WhatsApp connection status
+   - Response: { "isConnected": true, "phoneNumber": "918590000953", "qrCode": null }
+
+3. GET /api/contacts
+   - Get all WhatsApp contacts
+   - Response: Array of contact objects
+
+4. GET /api/messages?chatId=918590000953@c.us&limit=50
+   - Get message history for a contact
+
+### Phone Number Format
+CRITICAL: Phone numbers must be in international format WITHOUT the '+' symbol.
+- Correct: "918590000953" (India), "447700900000" (UK), "12025550123" (USA)
+- Wrong: "+918590000953", "8590000953"
+
+### Implementation Requirements
+
+1. Create a WhatsAppAPI class in PHP with these methods:
+   - sendMessage($phoneNumber, $message)
+   - getSessionStatus()
+   - isReady()
+   - getContacts()
+
+2. Implement error handling:
+   - Wrap all API calls in try-catch blocks
+   - Don't fail critical operations (like user registration) if WhatsApp fails
+   - Log all errors for monitoring
+   - Always check isReady() before sending messages
+
+3. Use cases to implement:
+   - Send welcome message when user registers
+   - Send order confirmation after checkout
+   - Send password reset notifications
+   - Send promotional messages (with rate limiting)
+
+4. Rate limiting:
+   - Add 2-3 second delays between bulk messages
+   - WhatsApp may rate limit high-volume sending
+
+### Code Example Template
+
+```php
+<?php
+class WhatsAppAPI {
+    private $baseUrl;
+    
+    public function __construct($baseUrl = 'http://localhost:5000') {
+        $this->baseUrl = rtrim($baseUrl, '/');
+    }
+    
+    public function sendMessage($phoneNumber, $message) {
+        // Use CURL to POST /api/send-message
+        // Handle errors with try-catch
+        // Return success/failure
+    }
+    
+    public function isReady() {
+        // Check GET /api/session
+        // Return true if isConnected === true
+    }
+}
+
+// Usage example
+function registerUser($username, $email, $phoneNumber, $password) {
+    // 1. Create user in database
+    $userId = createUserInDatabase($username, $email, $phoneNumber, $password);
+    
+    // 2. Send WhatsApp welcome message
+    try {
+        $whatsapp = new WhatsAppAPI('http://whatsapp-bot:5000');
+        if ($whatsapp->isReady()) {
+            $cleanPhone = preg_replace('/[^0-9]/', '', $phoneNumber);
+            $message = "Welcome {$username}! Your account is now active.";
+            $whatsapp->sendMessage($cleanPhone, $message);
+        }
+    } catch (Exception $e) {
+        error_log("WhatsApp failed: " . $e->getMessage());
+        // Continue even if WhatsApp fails
+    }
+    
+    return ['success' => true, 'userId' => $userId];
+}
+?>
+```
+
+### Important Notes
+
+1. **No Authentication**: The API has no auth. Secure it at network level (firewall, VPN, reverse proxy).
+
+2. **Connection Dependency**: The WhatsApp bot must stay authenticated. If disconnected, admin must scan QR code via web interface at http://whatsapp-bot:5000
+
+3. **Error Handling Priority**: Never let WhatsApp failures block critical operations like user registration or checkout.
+
+4. **Testing**: Before production:
+   - Test with curl: curl -X POST http://localhost:5000/api/send-message -H "Content-Type: application/json" -d '{"phoneNumber":"918590000953","message":"test"}'
+   - Verify isReady() returns true
+   - Send test messages to verify delivery
+
+5. **Monitoring**: Set up alerts for when WhatsApp disconnects (isConnected becomes false).
+
+### Deliverables Expected
+
+1. WhatsAppAPI.php class with all methods
+2. Integration in user registration flow
+3. Error logging and monitoring
+4. Documentation of implementation
+5. Test results showing successful message delivery
+
+### Reference Documentation
+
+- Full PHP Integration Guide: See PHP_INTEGRATION_GUIDE.md
+- API Integration Examples: Available in web UI at http://whatsapp-bot:5000 under "API Integration" tab
+- Docker Deployment: See DOCKER_KOYEB_DEPLOYMENT.md if you need to deploy the bot
+
+### Success Criteria
+
+- [ ] WhatsAppAPI class created and working
+- [ ] Messages sent successfully on user registration
+- [ ] Error handling prevents registration failures
+- [ ] Rate limiting implemented for bulk messages
+- [ ] Logging in place for debugging
+- [ ] Tested with real WhatsApp numbers
+- [ ] Documentation updated
+
+### Getting Started
+
+1. Verify WhatsApp bot is running: curl http://whatsapp-bot:5000/api/session
+2. Check it's connected: Look for "isConnected": true
+3. Send test message: Use curl command from testing section
+4. Implement WhatsAppAPI class
+5. Integrate into your application flows
+6. Test thoroughly before production
+
+Good luck! The API is simple and straightforward. Focus on robust error handling and don't let WhatsApp failures break your core application flows.
