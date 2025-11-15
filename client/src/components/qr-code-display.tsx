@@ -8,6 +8,8 @@ interface QRCodeDisplayProps {
 }
 
 export function QRCodeDisplay({ qrCode }: QRCodeDisplayProps) {
+  const isImageQR = qrCode?.startsWith("data:image");
+  
   return (
     <div className="flex items-center justify-center h-full p-8">
       <Card className="max-w-2xl w-full p-8">
@@ -28,7 +30,16 @@ export function QRCodeDisplay({ qrCode }: QRCodeDisplayProps) {
           <div className="flex justify-center py-6">
             {qrCode ? (
               <div className="p-6 bg-white rounded-lg" data-testid="qr-code-container">
-                <QRCodeSVG value={qrCode} size={256} level="M" />
+                {isImageQR ? (
+                  <img 
+                    src={qrCode} 
+                    alt="WhatsApp QR Code" 
+                    className="w-64 h-64"
+                    data-testid="qr-image"
+                  />
+                ) : (
+                  <QRCodeSVG value={qrCode} size={256} level="M" />
+                )}
               </div>
             ) : (
               <div className="p-6 bg-muted rounded-lg">

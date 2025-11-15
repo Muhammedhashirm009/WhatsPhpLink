@@ -1,0 +1,120 @@
+
+Node.js v20.19.5
+
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+
+node:internal/modules/esm/resolve:873
+  throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+        ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@replit/vite-plugin-runtime-error-modal' imported from /app/dist/index.js
+    at packageResolve (node:internal/modules/esm/resolve:873:9)
+    at moduleResolve (node:internal/modules/esm/resolve:946:18)
+    at defaultResolve (node:internal/modules/esm/resolve:1188:11)
+    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:708:12)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:657:25)
+    at ModuleLoader.resolve (node:internal/modules/esm/loader:640:38)
+    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:264:38)
+    at ModuleJob._link (node:internal/modules/esm/module_job:168:49) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+
+Node.js v20.19.5
+Application exited with code 1. This usually indicates an application failure. Check that the command used to launch your application is correct.
+Instance stopped.
+Instance created. Preparing to start...
+Starting download for registry01.prod.koyeb.com/k-00a338a6-995e-4317-abfc-99986a89af8e/cf7c0ec7-aad2-446f-b1f0-ec292acbc586:186010f8-50b4-4b42-b49c-54cc412e7efb
+Download progress:  80% |[32m++++++[0m--| (65.6 MiB/s)
+Download progress:  80% |[32m++++++[0m--| (12.9 MiB/s)
+Download complete for registry01.prod.koyeb.com/k-00a338a6-995e-4317-abfc-99986a89af8e/cf7c0ec7-aad2-446f-b1f0-ec292acbc586:186010f8-50b4-4b42-b49c-54cc412e7efb
+Instance is starting... Waiting for health checks to pass.
+
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+
+Initializing WhatsApp service...
+Using system Chromium at: /usr/bin/chromium
+Starting WhatsApp client initialization...
+QR code received
+WhatsApp client initialized successfully
+6:45:01 PM [express] serving on port 5000
+Instance is healthy. All health checks are passing.
+6:45:06 PM [express] GET /api/session 200 in 18ms :: {"id":"c9eddf4e-2e05-4d6e-8e1e-47c0d56617c8","p…
+6:45:43 PM [express] GET /api/session 304 in 204ms :: {"id":"c9eddf4e-2e05-4d6e-8e1e-47c0d56617c8","…
+6:45:48 PM [express] GET /api/session 304 in 309ms :: {"id":"c9eddf4e-2e05-4d6e-8e1e-47c0d56617c8","…
+6:46:14 PM [express] GET /api/session 304 in 108ms :: {"id":"c9eddf4e-2e05-4d6e-8e1e-47c0d56617c8","…
+QR code received
+6:46:34 PM [express] GET /api/session 200 in 106ms :: {"id":"c9eddf4e-2e05-4d6e-8e1e-47c0d56617c8","…
+6:47:03 PM [express] GET /api/session 200 in 95ms :: {"id":"c9eddf4e-2e05-4d6e-8e1e-47c0d56617c8","p…
+WhatsApp client disconnected: LOGOUT
+6:47:40 PM [express] GET /api/session 200 in 301ms :: {"id":"c9eddf4e-2e05-4d6e-8e1e-47c0d56617c8","…
+6:48:02 PM [express] GET /api/session 200 in 511ms :: {"id":"c9eddf4e-2e05-4d6e-8e1e-47c0d56617c8","…
+6:48:38 PM [express] GET /api/session 304 in 2ms :: {"id":"c9eddf4e-2e05-4d6e-8e1e-47c0d56617c8","ph…
+Instance created. Preparing to start...
+Instance is starting... Waiting for health checks to pass.
+
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+
+Initializing WhatsApp service...
+Using system Chromium at: /usr/bin/chromium
+Starting WhatsApp client initialization...
+6:49:31 PM [express] GET /api/session 304 in 4ms :: {"id":"c9eddf4e-2e05-4d6e-8e1e-47c0d56617c8","ph…
+QR code received
+WhatsApp client initialized successfully
+6:49:37 PM [express] serving on port 5000
+Instance is healthy. All health checks are passing.
+Instance is stopping.
+6:50:13 PM [express] GET /api/session 200 in 2ms :: {"id":"2b2805fb-828f-45e8-97c1-45f6b034602e","ph…
+/app/node_modules/puppeteer-core/lib/cjs/puppeteer/common/Connection.js:329
+                error: new Errors_js_1.ProtocolError(),
+                       ^
+
+ProtocolError: Protocol error (Runtime.callFunctionOn): Target closed.
+    at /app/node_modules/puppeteer-core/lib/cjs/puppeteer/common/Connection.js:329:24
+    at new Promise (<anonymous>)
+    at CDPSessionImpl.send (/app/node_modules/puppeteer-core/lib/cjs/puppeteer/common/Connection.js:325:16)
+    at ExecutionContext._ExecutionContext_evaluate (/app/node_modules/puppeteer-core/lib/cjs/puppeteer/common/ExecutionContext.js:211:46)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ExecutionContext.evaluate (/app/node_modules/puppeteer-core/lib/cjs/puppeteer/common/ExecutionContext.js:107:16) {
+  originalMessage: ''
+}
+
+Node.js v20.19.5
+npm error path /app
+npm error command failed
+npm error signal SIGTERM
+npm error command sh -c NODE_ENV=production node dist/index.js
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.6.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.2
+npm notice To update run: npm install -g npm@11.6.2
+npm notice
+npm error Log files were not written due to an error writing to the directory: /home/whatsapp/.npm/_logs
+npm error You can rerun the command with `--loglevel=verbose` to see the logs in your terminal
+Instance stopped.
+6:51:22 PM [express] GET /api/session 200 in 7ms :: {"id":"2b2805fb-828f-45e8-97c1-45f6b034602e","ph…
+QR code received
+WhatsApp client disconnected: LOGOUT
+6:52:07 PM [express] GET /api/session 200 in 1290ms :: {"id":"2b2805fb-828f-45e8-97c1-45f6b034602e",…
+Instance created. Preparing to start...
+Starting download for registry01.prod.koyeb.com/k-00a338a6-995e-4317-abfc-99986a89af8e/cf7c0ec7-aad2-446f-b1f0-ec292acbc586:186010f8-50b4-4b42-b49c-54cc412e7efb
+Download progress:  51% |[32m++++[0m----| (70.8 MiB/s)
+
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+
+Initializing WhatsApp service...
+Using system Chromium at: /usr/bin/chromium
+Starting WhatsApp client initialization...
+Download progress:  51% |[32m++++[0m----| (12.3 MiB/s)
+Download complete for registry01.prod.koyeb.com/k-00a338a6-995e-4317-abfc-99986a89af8e/cf7c0ec7-aad2-446f-b1f0-ec292acbc586:186010f8-50b4-4b42-b49c-54cc412e7efb
+Instance is starting... Waiting for health checks to pass.
+QR code received
+WhatsApp client initialized successfully
+6:53:52 PM [express] serving on port 5000
+Instance is healthy. All health checks are passing.
+6:54:16 PM [express] GET /api/session 200 in 3ms :: {"id":"fb4b8398-6a5c-4206-aa29-cd988a026b11","ph…
+6:54:48 PM [express] GET /api/session 304 in 18ms :: {"id":"fb4b8398-6a5c-4206-aa29-cd988a026b11","p…
+6:55:37 PM [express] GET /api/session 304 in 4ms :: {"id":"fb4b8398-6a5c-4206-aa29-cd988a026b11","ph…

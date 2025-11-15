@@ -1,0 +1,100 @@
+
+      74 packages are looking for funding
+        run `npm fund` for details
+
+      13 vulnerabilities (3 low, 5 moderate, 5 high)
+
+      To address issues that do not require attention, run:
+        npm audit fix
+
+      To address all issues (including breaking changes), run:
+        npm audit fix --force
+
+      Run `npm audit` for details.
+
+  - Done (12.6s)
+- Running scripts
+  - Running `[0;33m[1;36mnpm run build[0m`
+
+
+      > rest-express@1.0.0 build
+      > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+      vite v5.4.20 building for production...
+      transforming...
+
+      A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+      ✓ 2169 modules transformed.
+      rendering chunks...
+      computing gzip size...
+      ../dist/public/index.html                   2.19 kB │ gzip:   0.86 kB
+      ../dist/public/assets/index-CNR-qC6W.css   69.98 kB │ gzip:  11.32 kB
+      ../dist/public/assets/index-D1Smzt_N.js   556.21 kB │ gzip: 172.60 kB
+
+      (!) Some chunks are larger than 500 kB after minification. Consider:
+      - Using dynamic import() to code-split the application
+      - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+      - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+      ✓ built in 2.94s
+
+        dist/index.js  16.4kb
+
+      ⚡ Done in 3ms
+
+  - Done (3.2s)
+  - Running `[0;33m[1;36mnpm run heroku-postbuild[0m`
+
+
+      > rest-express@1.0.0 heroku-postbuild
+      > npm install && npm run build
+
+
+      up to date, audited 521 packages in 712ms
+
+      62 packages are looking for funding
+        run `npm fund` for details
+
+      8 vulnerabilities (3 low, 5 high)
+
+      To address issues that do not require attention, run:
+        npm audit fix
+
+      To address all issues (including breaking changes), run:
+        npm audit fix --force
+
+      Run `npm audit` for details.
+
+      > rest-express@1.0.0 build
+      > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+      sh: 1: vite: not found
+
+  - Done (0.9s)
+
+- [1;36mDebug Info:[0m
+  - Command failed `npm run heroku-postbuild`
+    exit status: 127
+    stdout: <see above>
+    stderr: <see above>
+
+[0;31m! Failed to execute build script[0m
+[0;31m![0m
+[0;31m! The Heroku Node.js npm Install buildpack allows customization of the build process by executing the following scripts if they are defined in `[0;33mpackage.json[0m[0;31m`:[0m
+[0;31m! - `[0;33mheroku-prebuild[0m[0;31m` [0m
+[0;31m! - `[0;33mheroku-build[0m[0;31m` or `[0;33mbuild[0m[0;31m` [0m
+[0;31m! - `[0;33mheroku-postbuild[0m[0;31m`[0m
+[0;31m![0m
+[0;31m! An unexpected error occurred while executing `[0;33mnpm run heroku-postbuild[0m[0;31m`. See the log output above for more information.[0m
+[0;31m![0m
+[0;31m! Suggestions:[0m
+[0;31m! - Ensure that this command runs locally without error.[0m
+[0;31m![0m
+[0;31m! Use the debug information above to troubleshoot and retry your build.[0m
+[0;31m![0m
+[0;31m! If the issue persists and you think you found a bug in the buildpack, reproduce the issue locally with a minimal example. Open an issue in the buildpack's GitHub repository and include the details here:[0m
+[0;31m! [1;4;36mhttps://github.com/heroku/buildpacks-nodejs/issues[0m
+
+
+Timer: Builder ran for 18.596907066s and ended at 2025-11-15T18:07:28Z
+[31;1mERROR: [0mfailed to build: exit status 1
+Build failed ❌

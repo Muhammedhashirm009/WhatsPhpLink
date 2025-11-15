@@ -1,22 +1,23 @@
-import pkg from "whatsapp-web.js";
-const { Client, LocalAuth } = pkg;
+import makeWASocket, {
+  useMultiFileAuthState,
+  DisconnectReason,
+  fetchLatestBaileysVersion,
+  makeCacheableSignalKeyStore,
+  type WASocket,
+  type ConnectionState,
+} from "@whiskeysockets/baileys";
+import { Boom } from "@hapi/boom";
 import { storage } from "./storage";
 import type { Server as SocketIOServer } from "socket.io";
-import { execSync } from "child_process";
+import pino from "pino";
 
-function getChromiumPath(): string | undefined {
-  try {
-    const path = execSync("which chromium", { encoding: "utf-8" }).trim();
-    return path || undefined;
-  } catch {
-    return undefined;
-  }
-}
+const logger = pino({ level: "silent" });
 
 export class WhatsAppService {
-  private client: Client | null = null;
+  private sock: WASocket | null = null;
   private io: SocketIOServer | null = null;
   private isInitialized = false;
+  private qrCode: string | null = null;
 
   async initialize(io: SocketIOServer) {
     if (this.isInitialized) {
@@ -24,159 +25,163 @@ export class WhatsAppService {
       return;
     }
 
-    console.log("Initializing WhatsApp service...");
+    console.log("Initializing Baileys WhatsApp service...");
     this.io = io;
     this.isInitialized = true;
 
-    const chromiumPath = getChromiumPath();
-    const puppeteerConfig: any = {
-      headless: true,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-accelerated-2d-canvas",
-        "--no-first-run",
-        "--no-zygote",
-        "--disable-gpu",
-      ],
-    };
-
-    if (chromiumPath) {
-      console.log(`Using system Chromium at: ${chromiumPath}`);
-      puppeteerConfig.executablePath = chromiumPath;
-    } else {
-      console.log("Using bundled Chromium from Puppeteer");
-    }
-
-    this.client = new Client({
-      authStrategy: new LocalAuth({
-        dataPath: "./.wwebjs_auth",
-      }),
-      puppeteer: puppeteerConfig,
-    });
-
-    this.setupEventHandlers();
-    
-    console.log("Starting WhatsApp client initialization...");
     try {
-      await this.client.initialize();
-      console.log("WhatsApp client initialized successfully");
+      await this.connectToWhatsApp();
     } catch (error) {
-      console.error("Failed to initialize WhatsApp client:", error);
-      console.error("Error details:", error instanceof Error ? error.message : String(error));
+      console.error("Failed to initialize WhatsApp service:", error);
+      throw error;
     }
   }
 
-  private setupEventHandlers() {
-    if (!this.client || !this.io) return;
+  private async connectToWhatsApp() {
+    const { state, saveCreds } = await useMultiFileAuthState("./.sessions/baileys");
+    const { version } = await fetchLatestBaileysVersion();
 
-    this.client.on("qr", async (qr: string) => {
+    this.sock = makeWASocket({
+      version,
+      logger,
+      printQRInTerminal: false,
+      auth: {
+        creds: state.creds,
+        keys: makeCacheableSignalKeyStore(state.keys, logger),
+      },
+      generateHighQualityLinkPreview: true,
+      markOnlineOnConnect: true,
+    });
+
+    this.sock.ev.on("creds.update", saveCreds);
+    this.sock.ev.on("connection.update", async (update) => {
+      await this.handleConnectionUpdate(update);
+    });
+    this.sock.ev.on("messages.upsert", async ({ messages }) => {
+      await this.handleIncomingMessages(messages);
+    });
+
+    console.log("Baileys WhatsApp client initialized");
+  }
+
+  private async handleConnectionUpdate(update: Partial<ConnectionState>) {
+    const { connection, lastDisconnect, qr } = update;
+
+    if (qr) {
       console.log("QR code received");
+      this.qrCode = qr;
+      
       await storage.updateSession({
         qrCode: qr,
         isConnected: false,
       });
       this.io?.emit("qr", { qr });
-    });
+    }
 
-    this.client.on("ready", async () => {
-      console.log("WhatsApp client is ready");
-      const info = this.client?.info;
-      await storage.updateSession({
-        phoneNumber: info?.wid?.user || null,
-        isConnected: true,
-        qrCode: null,
-        lastConnected: new Date(),
-      });
-      this.io?.emit("ready");
+    if (connection === "close") {
+      const shouldReconnect =
+        (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut;
       
-      await this.loadContacts();
-    });
-
-    this.client.on("authenticated", async () => {
-      console.log("WhatsApp client authenticated");
-      this.io?.emit("authenticated");
-    });
-
-    this.client.on("auth_failure", async (msg: string) => {
-      console.error("Authentication failed:", msg);
-      await storage.updateSession({
-        isConnected: false,
-        qrCode: null,
-      });
-    });
-
-    this.client.on("disconnected", async (reason: string) => {
-      console.log("WhatsApp client disconnected:", reason);
+      console.log("Connection closed. Reconnecting:", shouldReconnect);
+      
       await storage.updateSession({
         isConnected: false,
         phoneNumber: null,
         qrCode: null,
       });
-      this.io?.emit("disconnected", { reason });
-    });
+      
+      this.io?.emit("disconnected", { reason: "Connection closed" });
 
-    this.client.on("message", async (msg: any) => {
+      if (shouldReconnect) {
+        setTimeout(() => {
+          this.connectToWhatsApp();
+        }, 3000);
+      }
+    } else if (connection === "open") {
+      console.log("WhatsApp connected successfully");
+      this.qrCode = null;
+      
+      const phoneNumber = this.sock?.user?.id?.split(":")[0] || null;
+      
+      await storage.updateSession({
+        phoneNumber,
+        isConnected: true,
+        qrCode: null,
+        lastConnected: new Date(),
+      });
+      
+      this.io?.emit("ready");
+      await this.loadContacts();
+    }
+  }
+
+  private async handleIncomingMessages(messages: any[]) {
+    for (const msg of messages) {
+      if (!msg.message) continue;
+      if (msg.key.fromMe) continue;
+
       try {
-        const chat = await msg.getChat();
-        const contact = await msg.getContact();
+        const chatId = msg.key.remoteJid || "";
+        const from = chatId;
+        const body = msg.message.conversation || msg.message.extendedTextMessage?.text || "";
+        const contactName = msg.pushName || null;
 
         await storage.createOrUpdateContact({
-          id: contact.id._serialized,
-          name: contact.name || null,
-          number: contact.number,
-          pushname: contact.pushname || null,
-          isGroup: chat.isGroup,
+          id: chatId,
+          name: contactName,
+          number: chatId.split("@")[0],
+          pushname: contactName,
+          isGroup: chatId.includes("@g.us"),
         });
 
         await storage.createMessage({
-          chatId: chat.id._serialized,
-          from: msg.from,
-          to: msg.to,
-          body: msg.body,
-          timestamp: new Date(msg.timestamp * 1000),
-          isFromMe: msg.fromMe,
+          chatId,
+          from,
+          to: this.sock?.user?.id || "",
+          body,
+          timestamp: new Date(msg.messageTimestamp * 1000),
+          isFromMe: false,
         });
 
         this.io?.emit("message", {
-          chatId: chat.id._serialized,
-          from: msg.from,
-          body: msg.body,
+          chatId,
+          from,
+          body,
         });
       } catch (error) {
         console.error("Error processing message:", error);
       }
-    });
+    }
   }
 
   private async loadContacts() {
     try {
-      if (!this.client) return;
+      if (!this.sock) return;
 
-      const chats = await this.client.getChats();
+      const chats = await this.sock.groupFetchAllParticipating();
       
-      for (const chat of chats) {
+      for (const [chatId, chat] of Object.entries(chats)) {
         try {
-          const contact = await chat.getContact();
           await storage.createOrUpdateContact({
-            id: contact.id._serialized,
-            name: contact.name || null,
-            number: contact.number,
-            pushname: contact.pushname || null,
-            isGroup: chat.isGroup,
+            id: chatId,
+            name: chat.subject || null,
+            number: chatId.split("@")[0],
+            pushname: chat.subject || null,
+            isGroup: chatId.includes("@g.us"),
           });
         } catch (error) {
           console.error("Error loading contact:", error);
         }
       }
+      
+      console.log(`Loaded ${Object.keys(chats).length} contacts`);
     } catch (error) {
       console.error("Error loading contacts:", error);
     }
   }
 
   async sendMessage(to: string, message: string) {
-    if (!this.client) {
+    if (!this.sock) {
       throw new Error("WhatsApp client not initialized");
     }
 
@@ -187,29 +192,29 @@ export class WhatsAppService {
 
     let chatId = to;
     if (!to.includes("@")) {
-      chatId = `${to}@c.us`;
+      chatId = `${to}@s.whatsapp.net`;
     }
 
     try {
-      const sentMessage = await this.client.sendMessage(chatId, message);
+      const result = await this.sock.sendMessage(chatId, { text: message });
       
-      const chat = await sentMessage.getChat();
-      const contact = await chat.getContact();
-
-      await storage.createOrUpdateContact({
-        id: contact.id._serialized,
-        name: contact.name || null,
-        number: contact.number,
-        pushname: contact.pushname || null,
-        isGroup: chat.isGroup,
-      });
+      const contact = await storage.getContact(chatId);
+      if (!contact) {
+        await storage.createOrUpdateContact({
+          id: chatId,
+          name: null,
+          number: to,
+          pushname: null,
+          isGroup: chatId.includes("@g.us"),
+        });
+      }
 
       const savedMessage = await storage.createMessage({
-        chatId: chat.id._serialized,
-        from: sentMessage.from,
-        to: sentMessage.to,
+        chatId,
+        from: this.sock.user?.id || chatId,
+        to: chatId,
         body: message,
-        timestamp: new Date(sentMessage.timestamp * 1000),
+        timestamp: new Date(),
         isFromMe: true,
       });
 
@@ -221,20 +226,28 @@ export class WhatsAppService {
   }
 
   async disconnect() {
-    if (this.client) {
-      await this.client.destroy();
-      this.client = null;
-      this.isInitialized = false;
+    try {
+      if (this.sock) {
+        await this.sock.logout();
+        this.sock = null;
+      }
+
       await storage.updateSession({
         isConnected: false,
         phoneNumber: null,
         qrCode: null,
       });
+
+      this.isInitialized = false;
+      console.log("WhatsApp disconnected successfully");
+    } catch (error) {
+      console.error("Error disconnecting:", error);
+      throw error;
     }
   }
 
   getClient() {
-    return this.client;
+    return this.sock;
   }
 }
 

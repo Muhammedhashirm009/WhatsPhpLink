@@ -41,7 +41,8 @@ export class MemStorage implements IStorage {
     const message: Message = { 
       ...insertMessage, 
       id,
-      timestamp: insertMessage.timestamp || new Date()
+      timestamp: insertMessage.timestamp || new Date(),
+      isFromMe: insertMessage.isFromMe ?? false
     };
     this.messages.set(id, message);
     return message;
@@ -103,7 +104,13 @@ export class MemStorage implements IStorage {
 
   async createSession(insertSession: InsertWhatsAppSession): Promise<WhatsAppSession> {
     const id = randomUUID();
-    this.session = { ...insertSession, id };
+    this.session = { 
+      id,
+      phoneNumber: insertSession.phoneNumber ?? null,
+      isConnected: insertSession.isConnected ?? false,
+      qrCode: insertSession.qrCode ?? null,
+      lastConnected: insertSession.lastConnected ?? null
+    };
     return this.session;
   }
 }

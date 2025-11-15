@@ -1,0 +1,27 @@
+Instance created. Preparing to start...
+Starting download for registry01.prod.koyeb.com/k-00a338a6-995e-4317-abfc-99986a89af8e/cf7c0ec7-aad2-446f-b1f0-ec292acbc586:709d61a5-e114-4640-989c-219e0bab14f7
+Download progress:  65% |+++++---| (85.7 MiB/s)
+Download progress:  65% |+++++---| (12.9 MiB/s)
+Download complete for registry01.prod.koyeb.com/k-00a338a6-995e-4317-abfc-99986a89af8e/cf7c0ec7-aad2-446f-b1f0-ec292acbc586:709d61a5-e114-4640-989c-219e0bab14f7
+Instance is starting... Waiting for health checks to pass.
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+Application exited with code 127. This usually indicates that the command used to launch the application cannot be found. Check that the command used to launch your application is correct.
+sh: 1: tsx: not found
+Application exited with code 127. This usually indicates that the command used to launch the application cannot be found. Check that the command used to launch your application is correct.
+Instance stopped.
+Instance created. Preparing to start...
+Starting download for registry01.prod.koyeb.com/k-00a338a6-995e-4317-abfc-99986a89af8e/cf7c0ec7-aad2-446f-b1f0-ec292acbc586:709d61a5-e114-4640-989c-219e0bab14f7
+Download progress:  97% |+++++++-| (127.1 MiB/s)
+Download progress:  97% |+++++++-| (23.6 MiB/s)
+Download complete for registry01.prod.koyeb.com/k-00a338a6-995e-4317-abfc-99986a89af8e/cf7c0ec7-aad2-446f-b1f0-ec292acbc586:709d61a5-e114-4640-989c-219e0bab14f7
+Instance is starting... Waiting for health checks to pass.
+sh: 1: tsx: not found
+Application exited with code 127. This usually indicates that the command used to launch the application cannot be found. Check that the command used to launch your application is correct.
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+Application exited with code 127. This usually indicates that the command used to launch the application cannot be found. Check that the command used to launch your application is correct.
+sh: 1: tsx: not found
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+Instance stopped.
